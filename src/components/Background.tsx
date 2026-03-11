@@ -20,11 +20,11 @@ export default function SmokeBackground() {
 
     class Line {
       points: { x: number; y: number }[];
-      speed: number;
-      angle: number;
-      color: string;
-      thickness: number;
-      opacity: number;
+      speed!: number;
+      angle!: number;
+      color!: string;
+      thickness!: number;
+      opacity!: number;
 
       constructor() {
         this.reset();
