@@ -39,14 +39,11 @@ export default function Skills() {
           trigger: gridRef.current,
           start: "top 85%",
         },
-        scale: 0.8,
+        y: 40,
         opacity: 0,
-        duration: 0.5,
-        stagger: {
-          amount: 1,
-          grid: "auto",
-        },
-        ease: "back.out(1.7)"
+        duration: 0.8,
+        stagger: 0.1,
+        ease: "power2.out"
       });
     }, titleRef);
 
@@ -54,23 +51,25 @@ export default function Skills() {
   }, []);
 
   return (
-    <section id="skills" className="py-32 px-4 max-w-6xl mx-auto">
-      <div ref={titleRef} className="mb-16">
-        <h2 className="text-3xl font-mono text-blue-400 tracking-wider mb-2">/ Expertise</h2>
-        <h3 className="text-4xl md:text-5xl font-bold">Skills & Technologies</h3>
+    <section id="skills" className="py-24 px-8 max-w-7xl mx-auto min-h-screen">
+      <div ref={titleRef} className="mb-24 text-left border-l-4 border-blue-500 pl-10">
+        <h2 className="text-blue-500 font-mono tracking-[0.5em] uppercase mb-6 text-sm font-bold">Core Competencies</h2>
+        <h3 className="text-6xl md:text-9xl font-black bg-gradient-to-b from-white to-gray-700 bg-clip-text text-transparent uppercase tracking-tighter">
+          The Stack
+        </h3>
       </div>
 
-      <div ref={gridRef} className="flex flex-wrap gap-4">
+      <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-20">
         {skills.map((skill, index) => (
           <div 
             key={index} 
-            className="skill-chip glass px-6 py-4 rounded-2xl border border-white/5 hover:border-blue-500/30 hover:bg-blue-500/5 transition-all duration-300 group cursor-default"
+            className="skill-chip relative group cursor-default"
           >
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-mono text-gray-500 group-hover:text-blue-400/80 transition-colors uppercase tracking-widest leading-none mb-1">
+            <div className="flex flex-col gap-4 border-l-2 border-white/5 group-hover:border-blue-500 transition-all pl-6">
+              <span className="text-xs font-mono text-gray-600 group-hover:text-blue-400/60 transition-colors uppercase tracking-[0.3em] font-bold">
                 {skill.category}
               </span>
-              <span className="text-xl font-medium text-gray-200 group-hover:text-white transition-colors">
+              <span className="text-3xl md:text-4xl font-bold text-gray-400 group-hover:text-white transition-all uppercase tracking-tight">
                 {skill.name}
               </span>
             </div>
@@ -80,3 +79,4 @@ export default function Skills() {
     </section>
   );
 }
+

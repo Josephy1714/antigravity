@@ -15,76 +15,97 @@ export default function SmokeBackground() {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    const particles: Particle[] = [];
-    const particleCount = 40;
+    const lineCount = 150;
+    const lines: Line[] = [];
 
-    class Particle {
-      x: number;
-      y: number;
-      size: number;
-      speedX: number;
-      speedY: number;
-      opacity: number;
+    class Line {
+      points: { x: number; y: number }[];
+      speed: number;
+      angle: number;
       color: string;
+      thickness: number;
+      opacity: number;
 
       constructor() {
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.size = Math.random() * 300 + 100;
-        this.speedX = (Math.random() - 0.5) * 0.5;
-        this.speedY = (Math.random() - 0.5) * 0.5;
-        this.opacity = Math.random() * 0.3;
-        this.color = `hsla(217, 91%, 60%, ${this.opacity})`;
+        this.reset();
+        // Distribute points initially
+        this.points = [{ x: Math.random() * width, y: Math.random() * height }];
+      }
+
+      reset() {
+        this.points = [{ x: Math.random() * width, y: Math.random() * height }];
+        this.speed = Math.random() * 1.5 + 0.5;
+        this.angle = Math.random() * Math.PI * 2;
+        this.thickness = Math.random() * 1.2 + 0.3;
+        this.opacity = Math.random() * 0.4 + 0.2;
+        this.color = `rgba(59, 130, 246, ${this.opacity})`; // Bright blue
       }
 
       update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
+        const lastPoint = this.points[0];
+        
+        // Add some "hair-like" randomness to the direction
+        this.angle += (Math.random() - 0.5) * 0.15;
+        
+        const nextX = lastPoint.x + Math.cos(this.angle) * this.speed;
+        const nextY = lastPoint.y + Math.sin(this.angle) * this.speed;
 
-        if (this.x > width + this.size) this.x = -this.size;
-        if (this.x < -this.size) this.x = width + this.size;
-        if (this.y > height + this.size) this.y = -this.size;
-        if (this.y < -this.size) this.y = height + this.size;
+        this.points.unshift({ x: nextX, y: nextY });
+
+        // Maintain a "hair" length
+        if (this.points.length > 60) {
+          this.points.pop();
+        }
+
+        // Screen wrapping with reset to avoid jagged jumps
+        if (nextX > width + 50 || nextX < -50 || nextY > height + 50 || nextY < -50) {
+          this.reset();
+        }
       }
 
       draw() {
-        if (!ctx) return;
-        const gradient = ctx.createRadialGradient(
-          this.x,
-          this.y,
-          0,
-          this.x,
-          this.y,
-          this.size
-        );
-        gradient.addColorStop(0, this.color);
-        gradient.addColorStop(1, "transparent");
-
-        ctx.fillStyle = gradient;
+        if (!ctx || this.points.length < 2) return;
+        
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(this.points[0].x, this.points[0].y);
+        
+        for (let i = 1; i < this.points.length; i++) {
+          ctx.lineTo(this.points[i].x, this.points[i].y);
+        }
+
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.thickness;
+        ctx.lineCap = "round";
+        ctx.stroke();
       }
     }
 
     const init = () => {
-      for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle());
+      lines.length = 0;
+      for (let i = 0; i < lineCount; i++) {
+        lines.push(new Line());
       }
     };
 
     const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-      particles.forEach((particle) => {
-        particle.update();
-        particle.draw();
+      // Pure black background - no transparency here to keep it "pure darkness"
+      // But we use a slight clearRect or fillRect to allow some accumulation if desired
+      // User said "pure darkness", so let's clear it every frame for maximum sharpness
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, width, height);
+
+      lines.forEach((line) => {
+        line.update();
+        line.draw();
       });
+
       requestAnimationFrame(animate);
     };
 
     const handleResize = () => {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      init();
     };
 
     init();
@@ -97,8 +118,8 @@ export default function SmokeBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed top-0 left-0 w-full h-full -z-10 bg-slate-950"
-      style={{ filter: "blur(40px)" }}
+      className="fixed top-0 left-0 w-full h-full -z-10 bg-black"
+      style={{ filter: "none" }} // Explicitly removing blur
     />
   );
 }
